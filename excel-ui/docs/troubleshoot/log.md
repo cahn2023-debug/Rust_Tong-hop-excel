@@ -1,24 +1,33 @@
-# Troubleshoot Log: Type Mismatch in Excel Parser
+# Council Deliberation: Code Audit v2.1
 
-## 🛑 Issue Description
-**Symptom**: The application failed to compile after a refactor of the `ExcelParser`.
-**Error**: `mismatched types` in `src/parser/mod.rs:19`. 
-`expected enum Result, found enum Option`
+## Agent Profiles
+- **Agent 1 (Security Sentinel)**: Focus on path validation and SQL safety.
+- **Agent 2 (Performance Prophet)**: Focus on Batch Inserts and Parser efficiency.
+- **Agent 3 (Logic Lord)**: Focus on modularizing the Parser and error handling.
+- **Agent 4 (System Architect)**: Focus on the overall pipeline structure and state management.
 
-## 🔎 Root Cause Analysis
-During the implementation of multi-sheet scanning, the `worksheet_range` method was erroneously wrapped in a `Some()` pattern in an `if let` statement. This was incorrect because `worksheet_range` returns a `Result`, not an `Option`.
+## Deliberation Log
 
-## 🏛️ Council Deliberation
-- **Logic Lord**: Identified the typo in the pattern matching.
-- **Architect**: Recommended also cleaning up unused imports to maintain a stable build.
-- **Security & Performance**: No impact found.
+### Security Sentinel
+"The path handling in `run_consolidation` and `open_file` looks standard for a local tool, but we must ensure we aren't allowing arbitrary shell command execution in `open_file`. Using `Command::new("cmd").args(...)` is slightly risky if `path` isn't escaped. Thankfully, we are using `args` correctly, but we should wrap paths in quotes or use a more robust File Opener crate if available."
 
-## ✅ Resolution
-- [x] Fixed `if let Ok(range)` in `parser/mod.rs`.
-- [x] Removed unused `HashMap` in `supervisor.rs`.
-- [x] Removed unused `PathBuf` in `scanner/mod.rs`.
-- [x] Removed unused `Emitter` in `main.rs`.
+### Performance Prophet
+"The current SQLite insert logic is O(n) calls to the DB. For a project with 10k rows, this will hang the UI thread even with async. We **MUST** use `BEGIN TRANSACTION` and batch inserts. Also, the Parser's `take(100)` and nested loops are fine for 100 rows, but we should ensure we don't re-parse the same range multiple times in `find_header_and_cols`."
 
-## 🧪 Verification
-- [x] Cargo build successful.
-- [x] All 3 warnings resolved.
+### Logic Lord
+"`ExcelParser::parse` is a God Function. It handles:
+1. Workbook opening.
+2. Global skip rows.
+3. Table detection.
+4. Record mapping.
+5. Error fallback (scattered).
+I recommend splitting this into `detect_table_structure` and `extract_records`. Also, replace the heuristic neighbor filling (qty-3, qty-2, qty-1) with a more explicit rule set."
+
+### System Architect
+"The `Supervisor` handles a lot of state but it's well-structured. We should ensure the `CacheManager` is truly thread-safe if we ever move to multi-threaded processing. Currently, it's using a single connection. For future-proofing, let's ensure the `CacheManager` can handle connection pooling or at least safe cloning (which it already does)."
+
+## Final Consensus
+1. **Fix SQLite Performance**: Implement transactions for batch inserts in `sqlite.rs`.
+2. **Refactor Parser**: Split `ExcelParser` logic into smaller, testable units.
+3. **Enhance Security**: Sanitize file paths before passing them to OS commands.
+4. **Cleanup**: Remove all `kw_qty` warnings and unused code.

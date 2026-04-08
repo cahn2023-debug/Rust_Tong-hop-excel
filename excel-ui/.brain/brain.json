@@ -1,0 +1,68 @@
+{
+    "meta": {
+        "schema_version": "1.1.0",
+        "awf_version": "3.3.0"
+    },
+    "project": {
+        "name": "Excel Engine Ultra",
+        "type": "Tauri Desktop App",
+        "status": "Production Ready v1.1.0 (Improved Extraction)"
+    },
+    "tech_stack": {
+        "frontend": {
+            "framework": "Vite + TypeScript",
+            "styling": "Vanilla CSS"
+        },
+        "backend": {
+            "framework": "Tauri (Rust)",
+            "plugins": [
+                "opener",
+                "dialog"
+            ],
+            "libraries": [
+                "calamine",
+                "anyhow",
+                "crossbeam-channel",
+                "rayon",
+                "rusqlite"
+            ]
+        }
+    },
+    "api_endpoints": [
+        {
+            "path": "run_consolidation",
+            "explained": "Thực hiện quét and gộp dữ liệu từ các file Excel."
+        },
+        {
+            "path": "clear_cache",
+            "explained": "Xóa database cache.db để buộc hệ thống quét lại từ đầu."
+        },
+        {
+            "path": "open_file",
+            "explained": "Mở file Excel bằng phần mềm mặc định."
+        },
+        {
+            "path": "get_file_data",
+            "explained": "Lấy dữ liệu thô từ một file (dùng cho tính năng Map manual)."
+        }
+    ],
+    "features": [
+        "Hybrid Extraction: Header-based + Anchor-based fallback",
+        "Adaptive Column Mapping: Tự động nhận diện 'Tên' và 'Khối lượng'",
+        "Diagnostic Logging: Hiển thị chi tiết mapping cột trong UI",
+        "SQLite Caching: Lưu kết quả phân tích để tăng tốc lần sau",
+        "Manual Override: Cho phép người dùng tự chỉ định cột"
+    ],
+    "knowledge_items": {
+        "patterns": [
+            "Use ColumnMapping::default() combined with manual field update for flexibility",
+            "Multi-threaded parsing with Rayon + Atomic progress tracking",
+            "Diagnostic metadata passed from Rust to TS via FileAnalysis struct"
+        ],
+        "gotchas": [
+            "Header detection requires both Name and Qty for high confidence",
+            "Large files should be skipped in quick scans",
+            "Summary table state must be cleared manually in React-like state patterns"
+        ]
+    }
+}

@@ -1,12 +1,12 @@
 use crate::domain::models::ExcelRecord;
 use crate::domain::normalization::Normalizer;
 use dashmap::DashMap;
-use std::collections::HashSet;
+use std::collections::HashMap;
 use std::sync::Arc;
 
 pub struct Aggregator {
-    // Key: (norm_name, norm_unit), Value: (stt, original_don_vi, original_ten, total_khoi_luong, sources)
-    results: Arc<DashMap<(String, String), (String, String, String, f64, HashSet<String>)>>,
+    // Key: (norm_name, norm_unit), Value: (stt, original_don_vi, original_ten, total_khoi_luong, source_quantities)
+    results: Arc<DashMap<(String, String), (String, String, String, f64, HashMap<String, f64>)>>,
     normalizer: Normalizer,
 }
 
@@ -22,19 +22,22 @@ impl Aggregator {
         for record in records {
             let norm_name = self.normalizer.normalize(&record.ten_cong_viec);
             let norm_unit = self.normalizer.normalize(&record.don_vi);
-            let source_info = format!("{} ({})", record.source_file, record.source_sheet);
+            let source_file = record.source_file.clone();
 
             let mut entry = self.results.entry((norm_name, norm_unit)).or_insert((
                 record.stt.clone(),
                 record.don_vi.clone(),
                 record.ten_cong_viec.clone(),
                 0.0,
-                HashSet::new(),
+                HashMap::new(),
             ));
 
             let val = entry.value_mut();
             val.3 += record.khoi_luong;
-            val.4.insert(source_info);
+
+            // Accumulate quantity per file
+            let source_qty = val.4.entry(source_file).or_insert(0.0);
+            *source_qty += record.khoi_luong;
         }
     }
 
@@ -43,7 +46,10 @@ impl Aggregator {
             .iter()
             .map(|r| {
                 let v = r.value();
-                let sources: Vec<String> = v.4.iter().cloned().collect();
+                let sources: Vec<String> =
+                    v.4.iter()
+                        .map(|(path, qty)| format!("{} ({})", path, qty))
+                        .collect();
                 (
                     v.0.clone(),
                     v.2.clone(),

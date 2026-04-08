@@ -5,7 +5,8 @@
     <meta charset="UTF-8" />
     <link rel="stylesheet" href="/src/styles.css" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Excel Aggregator Pro</title>
+    <link rel="icon" type="image/png" href="/src/assets/app-icon.png" />
+    <title>Excel Engine Ultra</title>
 </head>
 
 <body>
@@ -45,13 +46,6 @@
                     <div class="field-with-btn">
                         <input type="text" id="input-dir" placeholder="D:\Projects\ExcelFiles\" />
                         <button class="secondary-btn" id="browse-input-btn">Browse...</button>
-                    </div>
-                </div>
-                <div class="input-row">
-                    <label>Output File:</label>
-                    <div class="field-with-btn">
-                        <input type="text" id="output-file" placeholder="D:\Output\Summary.xlsx" />
-                        <button class="secondary-btn" id="browse-output-btn">Save...</button>
                     </div>
                 </div>
                 <div class="input-row">
@@ -99,6 +93,17 @@
                         <div class="settings-form">
                             <label>Global Skip Rows</label>
                             <input type="number" id="skip-rows" value="0" min="0" />
+
+                            <div class="settings-divider"
+                                style="margin: 20px 0; border-top: 1px solid var(--border); opacity: 0.3;"></div>
+
+                            <label>Performance Cache</label>
+                            <p class="settings-hint" style="font-size: 11px; opacity: 0.6; margin-bottom: 8px;">Delete
+                                saved file analysis to force a clean re-scan.</p>
+                            <button id="clear-cache-btn" class="secondary-btn"
+                                style="width: 100%; border-color: rgba(255, 100, 100, 0.3); color: #ff6b6b;">
+                                🗑 Clear All Cache
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -109,81 +114,114 @@
 
         <!-- Middle Pane: Live Preview -->
         <section class="pane middle-pane">
-            <div class="pane-header">
-                <h3><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                        style="margin-right: 8px;">
-                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                        <polyline points="14 2 14 8 20 8"></polyline>
-                        <line x1="16" y1="13" x2="8" y2="13"></line>
-                        <line x1="16" y1="17" x2="8" y2="17"></line>
-                        <polyline points="10 9 9 9 8 9"></polyline>
-                    </svg> Summary Preview</h3>
-                <div class="header-actions" style="display: flex; align-items: center; gap: 12px;">
-                    <button id="export-btn" class="primary-btn small" disabled
-                        style="padding: 4px 12px; font-size: 11px;">EXPORT</button>
-                    <span class="badge" id="stats-records-badge">0 Records</span>
+            <div class="middle-top-section">
+                <div class="pane-header">
+                    <h3><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" style="margin-right: 8px;">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                            <line x1="16" y1="13" x2="8" y2="13"></line>
+                            <line x1="16" y1="17" x2="8" y2="17"></line>
+                            <polyline points="10 9 9 9 8 9"></polyline>
+                        </svg> Summary Preview</h3>
+                    <div class="header-actions" style="display: flex; align-items: center; gap: 12px;">
+                        <button id="export-btn" class="primary-btn small" disabled
+                            style="padding: 4px 12px; font-size: 11px;">EXPORT</button>
+                        <span class="badge" id="stats-records-badge">0 Records</span>
+                    </div>
+                </div>
+                <div class="preview-table-container">
+                    <table id="preview-table">
+                        <thead id="preview-header">
+                            <tr>
+                                <th style="width: 60px;" data-col="stt">
+                                    <div class="th-content">
+                                        <span>STT</span>
+                                        <button class="filter-btn" data-col="stt">
+                                            <svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor"
+                                                stroke-width="2" fill="none">
+                                                <polyline points="6 9 12 15 18 9"></polyline>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                    <div class="col-resizer"></div>
+                                </th>
+                                <th style="width: auto;" data-col="ten_cong_viec">
+                                    <div class="th-content">
+                                        <span>Tên công việc (Template)</span>
+                                        <button class="filter-btn" data-col="ten_cong_viec">
+                                            <svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor"
+                                                stroke-width="2" fill="none">
+                                                <polyline points="6 9 12 15 18 9"></polyline>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                    <div class="col-resizer"></div>
+                                </th>
+                                <th style="width: 80px;" data-col="don_vi">
+                                    <div class="th-content">
+                                        <span>ĐVT</span>
+                                        <button class="filter-btn" data-col="don_vi">
+                                            <svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor"
+                                                stroke-width="2" fill="none">
+                                                <polyline points="6 9 12 15 18 9"></polyline>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                    <div class="col-resizer"></div>
+                                </th>
+                                <th style="width: 120px;" data-col="khoi_luong">
+                                    <div class="th-content">
+                                        <span>Số lượng</span>
+                                        <button class="filter-btn" data-col="khoi_luong">
+                                            <svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor"
+                                                stroke-width="2" fill="none">
+                                                <polyline points="6 9 12 15 18 9"></polyline>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                    <div class="col-resizer"></div>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody id="preview-body">
+                            <!-- Preview data will appear here -->
+                        </tbody>
+                    </table>
+                    <div id="preview-placeholder" class="placeholder-text">
+                        No data to preview. Run aggregation to see results.
+                    </div>
                 </div>
             </div>
-            <div class="preview-table-container">
-                <table id="preview-table">
-                    <thead id="preview-header">
-                        <tr>
-                            <th style="width: 60px;" data-col="stt">
-                                <div class="th-content">
-                                    <span>STT</span>
-                                    <button class="filter-btn" data-col="stt">
-                                        <svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor"
-                                            stroke-width="2" fill="none">
-                                            <polyline points="6 9 12 15 18 9"></polyline>
-                                        </svg>
-                                    </button>
-                                </div>
-                                <div class="col-resizer"></div>
-                            </th>
-                            <th style="width: auto;" data-col="ten_cong_viec">
-                                <div class="th-content">
-                                    <span>Tên công việc (Template)</span>
-                                    <button class="filter-btn" data-col="ten_cong_viec">
-                                        <svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor"
-                                            stroke-width="2" fill="none">
-                                            <polyline points="6 9 12 15 18 9"></polyline>
-                                        </svg>
-                                    </button>
-                                </div>
-                                <div class="col-resizer"></div>
-                            </th>
-                            <th style="width: 80px;" data-col="don_vi">
-                                <div class="th-content">
-                                    <span>ĐVT</span>
-                                    <button class="filter-btn" data-col="don_vi">
-                                        <svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor"
-                                            stroke-width="2" fill="none">
-                                            <polyline points="6 9 12 15 18 9"></polyline>
-                                        </svg>
-                                    </button>
-                                </div>
-                                <div class="col-resizer"></div>
-                            </th>
-                            <th style="width: 120px;" data-col="khoi_luong">
-                                <div class="th-content">
-                                    <span>Số lượng</span>
-                                    <button class="filter-btn" data-col="khoi_luong">
-                                        <svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor"
-                                            stroke-width="2" fill="none">
-                                            <polyline points="6 9 12 15 18 9"></polyline>
-                                        </svg>
-                                    </button>
-                                </div>
-                                <div class="col-resizer"></div>
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody id="preview-body">
-                        <!-- Preview data will appear here -->
-                    </tbody>
-                </table>
-                <div id="preview-placeholder" class="placeholder-text">
-                    No data to preview. Run aggregation to see results.
+
+            <div class="resizer horizontal" id="resizer-v"></div>
+
+            <div class="middle-bottom-section" id="detail-section">
+                <div class="pane-header">
+                    <h3><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" style="margin-right: 8px;">
+                            <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path>
+                            <polyline points="13 2 13 9 20 9"></polyline>
+                        </svg> File Detail Preview: <span id="current-detail-file"
+                            style="text-transform: none; color: var(--accent); margin-left:8px;">None</span></h3>
+                </div>
+                <div class="preview-table-container">
+                    <table id="detail-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 60px;">STT</th>
+                                <th style="width: auto;">Tên công việc</th>
+                                <th style="width: 80px;">ĐVT</th>
+                                <th style="width: 120px;">Số lượng</th>
+                            </tr>
+                        </thead>
+                        <tbody id="detail-body">
+                            <!-- File details will appear here -->
+                        </tbody>
+                    </table>
+                    <div id="detail-placeholder" class="placeholder-text">
+                        Click a file in the list to see its details.
+                    </div>
                 </div>
             </div>
         </section>

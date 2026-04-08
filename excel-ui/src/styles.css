@@ -21,6 +21,7 @@ body {
   --error: #ff5555;
   --success: #50fa7b;
   --system: #8be9fd;
+  --bg-card: #1e2227;
   --titlebar-h: 30px;
 }
 
@@ -99,28 +100,113 @@ body.maximized {
   background: rgba(255, 255, 255, 0.05);
 }
 
+/* File List Item - Highlighted from Summary */
 .file-list-item.highlighted {
-  background: rgba(0, 243, 255, 0.15) !important;
-  border-left: 3px solid var(--accent) !important;
-  box-shadow: inset 0 0 10px rgba(0, 243, 255, 0.2);
-  transform: translateX(4px);
+  background: rgba(74, 158, 255, 0.25) !important;
+  border-left: 4px solid var(--accent) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2), inset 0 0 10px rgba(74, 158, 255, 0.1);
+  transform: translateX(2px);
+}
+
+.file-list-item.highlighted .file-name {
+  color: #fff !important;
+  font-weight: 700;
+  text-shadow: 0 0 8px rgba(74, 158, 255, 0.4);
+}
+
+.file-list-item.highlighted .contribution-badge {
+  display: flex !important;
+  animation: pulse-badge 2s infinite;
+}
+
+@keyframes pulse-badge {
+  0% {
+    box-shadow: 0 0 0 0 rgba(74, 158, 255, 0.7);
+  }
+
+  70% {
+    box-shadow: 0 0 0 6px rgba(74, 158, 255, 0);
+  }
+
+  100% {
+    box-shadow: 0 0 0 0 rgba(74, 158, 255, 0);
+  }
+}
+
+/* File List Item - Selected Manually for Detail View */
+.file-list-item.selected {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border-left: 4px solid var(--success) !important;
+}
+
+/* Summary Row Highlighted from File List */
+tr.source-highlight td {
+  background: rgba(74, 158, 255, 0.15) !important;
+  color: #fff !important;
+  border-bottom: 1px solid var(--accent);
+  font-weight: 600;
+}
+
+tr.retail-highlight td {
+  background: rgba(80, 250, 123, 0.08) !important;
+  color: #fff !important;
+  border-bottom: 1px solid rgba(80, 250, 123, 0.2);
+}
+
+.file-list-item.selected .file-name {
+  color: #fff !important;
 }
 
 .file-list-item.warning-status .file-name {
-  color: #ff4d4f !important;
-  text-shadow: 0 0 5px rgba(255, 77, 79, 0.3);
+  opacity: 0.9;
 }
 
-.file-list-item.warning-status .file-icon {
-  color: #ff4d4f !important;
+.file-list-item.processed-status::after {
+  content: "";
+  width: 6px;
+  height: 6px;
+  background-color: #ff4d4f;
+  /* Red dot for "Checked/Processed" */
+  border-radius: 50%;
+  margin-left: 8px;
+  flex-shrink: 0;
+  box-shadow: 0 0 5px rgba(255, 77, 79, 0.5);
 }
 
-.file-list-item.warning-status::before {
-  content: "⚠️";
-  position: absolute;
-  left: 2px;
-  font-size: 10px;
-  z-index: 5;
+
+
+.file-list-item.valid-data-status .file-name,
+.file-list-item.valid-data-status .file-icon svg {
+  color: var(--success);
+  stroke: var(--success);
+}
+
+.file-list-item.valid-data-status .file-name {
+  font-weight: 700;
+  text-shadow: 0 0 8px rgba(80, 250, 123, 0.3);
+}
+
+
+
+.file-list-item.warning-status .file-name,
+.file-list-item.warning-status .file-icon svg {
+  color: #ffb86c;
+  stroke: #ffb86c;
+}
+
+/* Contribution Badge */
+.contribution-badge {
+  display: none;
+  background: var(--accent);
+  color: white;
+  font-size: 9px;
+  font-weight: 800;
+  padding: 1px 6px;
+  border-radius: 10px;
+  margin-left: auto;
+  margin-right: 8px;
+  box-shadow: 0 0 8px rgba(74, 158, 255, 0.5);
+  white-space: nowrap;
 }
 
 .file-context-wrapper {
@@ -492,6 +578,43 @@ input:focus {
 .middle-pane {
   flex-grow: 1;
   background: #111417;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-right: 1px solid var(--border);
+}
+
+.middle-top-section {
+  flex: 1;
+  min-height: 100px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.middle-bottom-section {
+  flex: 1;
+  min-height: 100px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: #0d0f11;
+  border-top: 1px solid var(--border);
+}
+
+.resizer.horizontal {
+  height: 6px;
+  width: 100%;
+  cursor: row-resize;
+  background: transparent;
+  transition: background 0.2s;
+  z-index: 100;
+  margin: -3px 0;
+}
+
+.resizer.horizontal:hover,
+.resizer.horizontal.active {
+  background: var(--accent);
 }
 
 .preview-table-container {
@@ -528,16 +651,17 @@ table {
 
 th {
   background: var(--bg-card);
-  padding: 8px 12px;
+  padding: 10px 12px;
   text-align: left;
-  font-weight: 600;
-  color: var(--text-dim);
-  border-bottom: 2px solid var(--border);
+  font-weight: 700;
+  color: var(--text);
+  border-bottom: 2px solid var(--accent);
   position: sticky;
   top: 0;
-  z-index: 10;
+  z-index: 100;
   white-space: nowrap;
   user-select: none;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
 }
 
 .th-content {
@@ -678,19 +802,6 @@ tr:hover td {
   display: flex;
   flex-direction: column;
   gap: 5px;
-}
-
-.file-card {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  border-left: 3px solid transparent !important;
-}
-
-.file-card.highlighted {
-  background: rgba(74, 158, 255, 0.15) !important;
-  border-color: var(--accent) !important;
-  border-left: 3px solid var(--accent) !important;
-  transform: translateX(4px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
 tr.active-row td {

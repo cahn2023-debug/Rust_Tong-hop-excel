@@ -1,0 +1,66 @@
+{
+    "updated_at": "2026-04-08T17:35:00Z",
+    "working_on": {
+        "feature": "Robust Excel Extraction",
+        "task": "Diagnostic logging and stricter mapping",
+        "status": "completed",
+        "files": [
+            "src-tauri/src/parser/mod.rs",
+            "src-tauri/src/domain/models.rs",
+            "excel-ui/src/main.ts"
+        ],
+        "blockers": [],
+        "notes": "Hệ thống đã ổn định, tự động nhận diện tốt hơn và có log để debug."
+    },
+    "pending_tasks": [
+        {
+            "task": "Add unit tests for diagnostic logging",
+            "priority": "low"
+        },
+        {
+            "task": "Implement PDF export fallback",
+            "priority": "low"
+        }
+    ],
+    "recent_changes": [
+        {
+            "timestamp": "2026-04-08T17:30:00Z",
+            "type": "bugfix",
+            "description": "Sửa lỗi Summary trống do nhận diện header sai và quản lý state frontend.",
+            "files": [
+                "src-tauri/src/parser/mod.rs",
+                "excel-ui/src/main.ts"
+            ]
+        },
+        {
+            "timestamp": "2026-04-08T17:20:00Z",
+            "type": "feature",
+            "description": "Thêm metadata nhận diện cột vào FileAnalysis để hiển thị Logs.",
+            "files": [
+                "src-tauri/src/domain/models.rs"
+            ]
+        }
+    ],
+    "errors_encountered": [
+        {
+            "error": "Schema mismatch (missing analysis column)",
+            "solution": "Added manual ALTER TABLE migration in sqlite.rs",
+            "resolved": true
+        },
+        {
+            "error": "Compilation error missing field in FileAnalysis",
+            "solution": "Updated all struct initializers to include detected_columns",
+            "resolved": true
+        }
+    ],
+    "decisions_made": [
+        {
+            "decision": "Stricter Header Matching",
+            "reason": "Avoid misinterpreting title rows as data headers."
+        },
+        {
+            "decision": "UI Diagnostic Logging",
+            "reason": "Provide transparency on how the engine maps columns per file."
+        }
+    ]
+}
