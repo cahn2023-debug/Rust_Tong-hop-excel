@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" href="/src/styles.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Excel Aggregator Pro</title>
+</head>
+
+<body>
+    <!-- Titlebar -->
+    <div id="titlebar" class="titlebar">
+        <div class="titlebar-drag-region" data-tauri-drag-region>
+            <div class="logo-container" style="pointer-events: none;">
+                <img src="/src/assets/app-icon.png" alt="XT" class="app-logo" />
+            </div>
+            <div class="app-name" style="pointer-events: none;">EXCEL ENGINE ULTRA</div>
+        </div>
+        <div class="window-controls">
+            <div class="control-btn" id="titlebar-minimize" title="Minimize">
+                <svg width="10" height="10" viewBox="0 0 10 10">
+                    <path d="M0 5h10v1H0z" fill="currentColor" />
+                </svg>
+            </div>
+            <div class="control-btn" id="titlebar-maximize" title="Maximize">
+                <svg width="10" height="10" viewBox="0 0 10 10">
+                    <path d="M1 1h8v8H1V1zm1 1v6h6V2H2z" fill="currentColor" />
+                </svg>
+            </div>
+            <div class="control-btn close" id="titlebar-close" title="Close">
+                <svg width="10" height="10" viewBox="0 0 10 10">
+                    <path d="M1 1l8 8M9 1L1 9" stroke="currentColor" stroke-width="1.2" />
+                </svg>
+            </div>
+        </div>
+    </div>
+
+    <main class="workspace-container">
+        <!-- Left Pane: Config & Actions -->
+        <aside class="pane left-pane">
+            <section class="config-pane">
+                <div class="input-row">
+                    <label>Input Folder:</label>
+                    <div class="field-with-btn">
+                        <input type="text" id="input-dir" placeholder="D:\Projects\ExcelFiles\" />
+                        <button class="secondary-btn" id="browse-input-btn">Browse...</button>
+                    </div>
+                </div>
+                <div class="input-row">
+                    <label>Output File:</label>
+                    <div class="field-with-btn">
+                        <input type="text" id="output-file" placeholder="D:\Output\Summary.xlsx" />
+                        <button class="secondary-btn" id="browse-output-btn">Save...</button>
+                    </div>
+                </div>
+                <div class="input-row">
+                    <label>Template File:</label>
+                    <div class="field-with-btn">
+                        <input type="text" id="template-file" placeholder="(Optional) D:\Templates\Model.xlsx" />
+                        <button class="secondary-btn" id="browse-template-btn">Select...</button>
+                    </div>
+                </div>
+                <div class="config-summary" id="config-summary">
+                    <div class="config-item">Config:</div>
+                    <div class="config-item">• STT: <span id="summary-stt">Auto</span></div>
+                    <div class="config-item">• Name: <span id="summary-name">Auto</span></div>
+                    <div class="config-item">• Qty: <span id="summary-qty">Auto</span></div>
+                </div>
+            </section>
+
+            <section class="action-pane">
+                <button id="run-btn" class="primary-btn">
+                    <span>▶</span> TIẾN HÀNH TỔNG HỢP
+                </button>
+                <div class="progress-container">
+                    <div class="progress-meta">
+                        <span id="progress-status">0 / 0</span>
+                        <span id="progress-percent">0%</span>
+                    </div>
+                    <div class="progress-track">
+                        <div id="progress-bar" class="progress-fill" style="width: 0%;"></div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="insight-pane">
+                <div class="tab-header">
+                    <button class="tab active" data-tab="logs">Logs</button>
+                    <button class="tab" data-tab="settings">Settings</button>
+                </div>
+                <div class="tab-content">
+                    <div id="tab-logs" class="tab-pane active">
+                        <div id="error-log" class="console-output">
+                            <div class="log-entry system">> Ready.</div>
+                        </div>
+                    </div>
+                    <div id="tab-settings" class="tab-pane">
+                        <div class="settings-form">
+                            <label>Global Skip Rows</label>
+                            <input type="number" id="skip-rows" value="0" min="0" />
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </aside>
+
+        <div class="resizer" id="resizer-left"></div>
+
+        <!-- Middle Pane: Live Preview -->
+        <section class="pane middle-pane">
+            <div class="pane-header">
+                <h3><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        style="margin-right: 8px;">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                        <line x1="16" y1="13" x2="8" y2="13"></line>
+                        <line x1="16" y1="17" x2="8" y2="17"></line>
+                        <polyline points="10 9 9 9 8 9"></polyline>
+                    </svg> Summary Preview</h3>
+                <div class="header-actions" style="display: flex; align-items: center; gap: 12px;">
+                    <button id="export-btn" class="primary-btn small" disabled
+                        style="padding: 4px 12px; font-size: 11px;">EXPORT</button>
+                    <span class="badge" id="stats-records-badge">0 Records</span>
+                </div>
+            </div>
+            <div class="preview-table-container">
+                <table id="preview-table">
+                    <thead id="preview-header">
+                        <tr>
+                            <th style="width: 60px;" data-col="stt">
+                                <div class="th-content">
+                                    <span>STT</span>
+                                    <button class="filter-btn" data-col="stt">
+                                        <svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor"
+                                            stroke-width="2" fill="none">
+                                            <polyline points="6 9 12 15 18 9"></polyline>
+                                        </svg>
+                                    </button>
+                                </div>
+                                <div class="col-resizer"></div>
+                            </th>
+                            <th style="width: auto;" data-col="ten_cong_viec">
+                                <div class="th-content">
+                                    <span>Tên công việc (Template)</span>
+                                    <button class="filter-btn" data-col="ten_cong_viec">
+                                        <svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor"
+                                            stroke-width="2" fill="none">
+                                            <polyline points="6 9 12 15 18 9"></polyline>
+                                        </svg>
+                                    </button>
+                                </div>
+                                <div class="col-resizer"></div>
+                            </th>
+                            <th style="width: 80px;" data-col="don_vi">
+                                <div class="th-content">
+                                    <span>ĐVT</span>
+                                    <button class="filter-btn" data-col="don_vi">
+                                        <svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor"
+                                            stroke-width="2" fill="none">
+                                            <polyline points="6 9 12 15 18 9"></polyline>
+                                        </svg>
+                                    </button>
+                                </div>
+                                <div class="col-resizer"></div>
+                            </th>
+                            <th style="width: 120px;" data-col="khoi_luong">
+                                <div class="th-content">
+                                    <span>Số lượng</span>
+                                    <button class="filter-btn" data-col="khoi_luong">
+                                        <svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor"
+                                            stroke-width="2" fill="none">
+                                            <polyline points="6 9 12 15 18 9"></polyline>
+                                        </svg>
+                                    </button>
+                                </div>
+                                <div class="col-resizer"></div>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody id="preview-body">
+                        <!-- Preview data will appear here -->
+                    </tbody>
+                </table>
+                <div id="preview-placeholder" class="placeholder-text">
+                    No data to preview. Run aggregation to see results.
+                </div>
+            </div>
+        </section>
+
+        <div class="resizer" id="resizer-right"></div>
+
+        <!-- Right Pane: File List -->
+        <aside class="pane right-pane">
+            <div class="pane-header">
+                <h3><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        style="margin-right: 8px;">
+                        <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                    </svg> Discovered Files</h3>
+            </div>
+            <div class="file-list-container">
+                <div id="file-list-items" class="file-items">
+                    <!-- Files will be injected here -->
+                </div>
+            </div>
+        </aside>
+    </main>
+
+    <!-- Overlay / Mapping Sidebar (Kept for functionality but themed) -->
+    <div id="mapping-sidebar" class="sidebar">
+        <div class="sidebar-header">
+            <h3>Mapping Override</h3>
+            <button id="close-sidebar">×</button>
+        </div>
+        <div class="sidebar-content">
+            <p id="sidebar-filename" class="filename-hint">path/to/file.xlsx</p>
+            <div class="field-group">
+                <label>STT Column</label>
+                <select id="map-stt"></select>
+            </div>
+            <div class="field-group">
+                <label>Name Column</label>
+                <select id="map-name"></select>
+            </div>
+            <div class="field-group">
+                <label>Unit Column</label>
+                <select id="map-unit"></select>
+            </div>
+            <div class="field-group">
+                <label>Qty Column</label>
+                <select id="map-qty"></select>
+            </div>
+            <button id="save-mapping" class="primary-btn small">Apply Override</button>
+        </div>
+    </div>
+
+    <!-- Filter Menu -->
+    <div id="column-filter-menu" class="filter-menu">
+        <div class="filter-menu-item" id="sort-asc">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M11 5h10M11 9h7M11 13h4M3 17l3 3 3-3M6 18V4" />
+            </svg>
+            Sắp xếp A → Z
+        </div>
+        <div class="filter-menu-item" id="sort-desc">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M11 19h10M11 15h7M11 11h4M3 7l3-3 3 3M6 6v14" />
+            </svg>
+            Sắp xếp Z → A
+        </div>
+        <div class="filter-menu-divider"></div>
+        <div class="filter-search-container">
+            <input type="text" id="filter-search-input" class="filter-search-input" placeholder="Tìm kiếm...">
+        </div>
+    </div>
+
+    <!-- File Context Menu -->
+    <div id="file-context-menu" class="context-menu">
+        <div class="menu-item" id="menu-open-file">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                style="margin-right: 8px;">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+            </svg>
+            Mở file Excel
+        </div>
+        <div class="menu-item" id="menu-open-folder">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                style="margin-right: 8px;">
+                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+            </svg>
+            Mở thư mục chứa file
+        </div>
+    </div>
+
+    <script type="module" src="/src/main.ts"></script>
+</body>
+
+</html>

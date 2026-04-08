@@ -1,0 +1,62 @@
+{
+    "updated_at": "2026-04-07T23:12:00+07:00",
+    "working_on": {
+        "feature": "UI/UX Polish (Sort & Filter, Resizable Layout)",
+        "status": "completed",
+        "notes": "Added advanced Excel-like table interactions and a flexible 3-pane dashboard layout."
+    },
+    "pending_tasks": [
+        {
+            "task": "User Manual / Help Guide",
+            "priority": "low",
+            "notes": "Document all UI features for the end-user."
+        }
+    ],
+    "recent_changes": [
+        {
+            "timestamp": "2026-04-07T23:10:00+07:00",
+            "type": "UI",
+            "description": "Implemented Excel-like Sort & Filter with glassmorphism menus.",
+            "files": [
+                "index.html",
+                "src/main.ts",
+                "src/styles.css"
+            ]
+        },
+        {
+            "timestamp": "2026-04-07T22:30:00+07:00",
+            "type": "UI",
+            "description": "Added linked-pair column resizing for the summary table.",
+            "files": [
+                "src/main.ts"
+            ]
+        },
+        {
+            "timestamp": "2026-04-07T22:15:00+07:00",
+            "type": "UI/UX",
+            "description": "Overhauled to 3-pane responsive layout with draggable resizers.",
+            "files": [
+                "index.html",
+                "src/styles.css",
+                "src/main.ts"
+            ]
+        }
+    ],
+    "errors_encountered": [
+        {
+            "error": "Table horizontal scroll conflict with column resizing",
+            "solution": "Used linked-pair resizing strategy to maintain table width integrity.",
+            "resolved": true
+        }
+    ],
+    "decisions_made": [
+        {
+            "decision": "Client-side Filtering/Sorting",
+            "reason": "Provides instant feedback without extra Tauri IPC overhead for simple table interactions."
+        },
+        {
+            "decision": "Draggable Resize Splitters",
+            "reason": "Essential for managing screen real estate in a multi-panel desktop app."
+        }
+    ]
+}

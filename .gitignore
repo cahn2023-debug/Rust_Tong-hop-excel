@@ -1,0 +1,6 @@
+/target
+/excel-ui/src-tauri/target
+*.db
+*.xlsx
+*.log
+build_error.txt
